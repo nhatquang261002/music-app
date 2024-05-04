@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Music App</string>
+    <string name="tab_1">Thư viện</string>
+    <string name="tab_2">Khám phá</string>
+    <string name="tab_3">Trending</string>
+    <string name="tab_4">Cá nhân</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_playlist_button_name">Tạo Playlist</string>
+    <string name="add_new_playlist">Add New Playlist</string>
+    <string name="playlist_name">Playlist Name</string>
+    <string name="playlist_description">Playlist Description</string>
+    <string name="add_playlist">Add Playlist</string>
+</resources>
