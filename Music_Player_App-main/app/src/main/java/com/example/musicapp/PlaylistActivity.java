@@ -18,8 +18,10 @@ import com.example.musicapp.adapter.PlaylistAdapter;
 import com.example.musicapp.adapter.SongAdapter;
 import com.example.musicapp.model.Playlist;
 import com.example.musicapp.model.Song;
+import com.example.musicapp.service.MusicService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlaylistActivity extends AppCompatActivity {
     private TextView playlist_name, playlist_description;
@@ -29,20 +31,20 @@ public class PlaylistActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist);
 
-//// playlist_name.findViewById(R.id.playlist_name_title);
-       // playlist_description.findViewById(R.id.playlist_description);
+        playlist_name = findViewById(R.id.playlist_name_title);
+        playlist_description = findViewById(R.id.playlist_description);
+
 
 
 
         // Retrieve playlist data from Intent
         Intent intent = getIntent();
         Playlist playlist = (Playlist) intent.getSerializableExtra("playlist");
-        ArrayList<Song> songs = playlist.getSongs();
-       // playlist_name.setText(playlist.getName());
-        // playlist_description.setText(playlist.getDescription());
-        RecyclerView songListRecyclerView = findViewById(R.id.playlist_recycler_view);
-        songListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        songListRecyclerView.setAdapter(new SongAdapter(songs));
+        List<String> songIds = playlist.getSongIds();
+        playlist_name.setText(playlist.getName());
+        playlist_description.setText(playlist.getDescription());
+        fetchSongsForPlaylist(songIds);
+
 
         ImageButton backButton = findViewById(R.id.back_btn);
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -57,6 +59,33 @@ public class PlaylistActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+    }
+
+    private void fetchSongsForPlaylist(List<String> songIds) {
+        if(songIds.isEmpty()) return;
+
+        MusicService.fetchSongs(this, new MusicService.SongCallback() {
+            @Override
+            public void onSuccess(ArrayList<Song> songs) {
+                // Filter the fetched songs based on the IDs in the playlist
+                ArrayList<Song> playlistSongs = new ArrayList<>();
+                for (Song song : songs) {
+                    if (songIds.contains(song.getId())) {
+                        playlistSongs.add(song);
+                    }
+                }
+
+                // Set up RecyclerView for songs in the playlist
+                RecyclerView songListRecyclerView = findViewById(R.id.playlist_recycler_view);
+                songListRecyclerView.setLayoutManager(new LinearLayoutManager(PlaylistActivity.this));
+                songListRecyclerView.setAdapter(new SongAdapter(playlistSongs));
+            }
+
+            @Override
+            public void onError(String message) {
+                // Handle error
+            }
         });
     }
 

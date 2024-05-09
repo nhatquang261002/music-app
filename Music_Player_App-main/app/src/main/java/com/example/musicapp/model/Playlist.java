@@ -1,24 +1,34 @@
 package com.example.musicapp.model;
 
-import com.example.musicapp.model.Song;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
+@Entity(tableName = "playlists")
 public class Playlist implements Serializable {
 
-    private String id;
+    @PrimaryKey(autoGenerate = true)
+    private long id;
     private String name;
     private String description;
-    private ArrayList<Song> songs;
+    private List<String> songIds; // List of song IDs
 
-    public Playlist(String name, String description, ArrayList<Song> songs) {
+    public Playlist(String name, String description, List<String> songIds) {
         this.name = name;
         this.description = description;
-        this.songs = songs;
+        this.songIds = songIds;
     }
 
+    public long getId() {
+        return id;
+    }
 
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -36,33 +46,34 @@ public class Playlist implements Serializable {
         this.description = description;
     }
 
-    public ArrayList<Song> getSongs() {
-        return songs;
+    public List<String> getSongIds() {
+        return songIds;
     }
 
-    public void setSongs(ArrayList<Song> songs) {
-        this.songs = songs;
+    public void setSongIds(List<String> songIds) {
+        this.songIds = songIds;
     }
 
-    public void addSong(Song song) {
-        if (songs == null) {
-            songs = new ArrayList<>();
+    public void addSongId(String songId) {
+        if (songIds == null) {
+            songIds = new ArrayList<>();
         }
-        songs.add(song);
+        songIds.add(songId);
     }
 
-    public void removeSong(Song song) {
-        if (songs != null) {
-            songs.remove(song);
+    public void removeSongId(String songId) {
+        if (songIds != null) {
+            songIds.remove(songId);
         }
     }
 
     @Override
     public String toString() {
         return "Playlist{" +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
-                ", songs=" + songs +
+                ", songIds=" + songIds +
                 '}';
     }
 }

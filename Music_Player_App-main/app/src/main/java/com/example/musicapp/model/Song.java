@@ -2,7 +2,9 @@ package com.example.musicapp.model;
 
 import java.io.Serializable;
 
+
 public class Song implements Serializable {
+
     private String id;
     private String name_song;
     private String name_artist;

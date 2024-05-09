@@ -52,7 +52,7 @@ public class AddPlaylistBottomSheetFragment extends BottomSheetDialogFragment {
 
                 // Validate input and add playlist to app
                 if (!playlistName.isEmpty()) {
-                    ArrayList<Song> songs = new ArrayList<>();
+                    ArrayList<String> songs = new ArrayList<>();
                     Playlist newPlaylist = new Playlist(playlistName, playlistDescription, songs); // Replace "" and null with actual data
                     addPlaylistListener.onPlaylistAdded(newPlaylist); // Notify the listener
                     dismiss();

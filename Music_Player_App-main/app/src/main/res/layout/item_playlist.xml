@@ -22,4 +22,15 @@
         android:layout_gravity="center"
         android:textStyle="bold" />
 
+    <ImageButton
+        android:id="@+id/options_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_dots"
+        android:background="?attr/selectableItemBackground"
+        android:contentDescription="@string/options"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp" />
+
+
 </LinearLayout>

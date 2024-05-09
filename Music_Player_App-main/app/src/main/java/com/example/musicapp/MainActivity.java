@@ -1,5 +1,6 @@
 package com.example.musicapp;
 
+
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -7,15 +8,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.room.Room;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.example.musicapp.adapter.HomeViewPagerAdapter;
+import com.example.musicapp.data.AppDatabase;
 
 public class MainActivity extends AppCompatActivity {
     private AHBottomNavigation bottomNavigation;
     private ViewPager2 viewPager;
+
+    public static AppDatabase database;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,8 +37,6 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.view_pager);
         setUpViewPager();
         createBottomNavigationBar();
-
-
     }
 
 

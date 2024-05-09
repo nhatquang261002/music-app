@@ -126,8 +126,8 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="color" value="444444" />
-                                                <entry key="imagePath" value="C:\Users\ASUS\AppData\Local\Temp\baseline_add_24.xml" />
+                                                <entry key="color" value="ff0000" />
+                                                <entry key="imagePath" value="C:\Users\ASUS\AppData\Local\Temp\baseline_delete_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -138,7 +138,7 @@
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="url" value="file:/$PROJECT_DIR$/../../../Lang_IDE/AndroidStudioSDK/icons/material/materialicons/add/baseline_add_24.xml" />
+                                                <entry key="url" value="file:/$PROJECT_DIR$/../../../Lang_IDE/AndroidStudioSDK/icons/material/materialicons/delete/baseline_delete_24.xml" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -182,7 +182,7 @@
                                   <option name="values">
                                     <map>
                                       <entry key="backgroundColor" value="f5e1e1" />
-                                      <entry key="outputName" value="ic_add" />
+                                      <entry key="outputName" value="ic_delete" />
                                     </map>
                                   </option>
                                 </PersistentState>

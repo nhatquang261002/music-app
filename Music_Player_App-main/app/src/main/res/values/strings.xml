@@ -4,6 +4,8 @@
     <string name="tab_2">Khám phá</string>
     <string name="tab_3">Trending</string>
     <string name="tab_4">Cá nhân</string>
+    <string name="options">Options</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_playlist_button_name">Tạo Playlist</string>

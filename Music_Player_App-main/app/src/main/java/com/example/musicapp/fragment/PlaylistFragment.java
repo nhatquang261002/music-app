@@ -15,34 +15,50 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicapp.MusicApp;
 import com.example.musicapp.PlaylistActivity;
 import com.example.musicapp.R;
 import com.example.musicapp.adapter.PlaylistAdapter;
+import com.example.musicapp.data.PlaylistDAO;
 import com.example.musicapp.model.Playlist;
-import com.example.musicapp.model.Song;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class PlaylistFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private PlaylistAdapter playlistAdapter;
     private LinearLayout addPlaylistButton;
-    private ArrayList<Playlist> playlists;
+    private PlaylistDAO playlistDAO;
+    private List<Playlist> playlists;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         playlists = new ArrayList<>();
-        ArrayList<Song> exampleSongs = new ArrayList<Song>();
 
-        exampleSongs.add(new Song("song_id", "song_name", "artist_name", "thubnail", "1", "", "", "", 120));
-        exampleSongs.add(new Song("song_id", "song_name", "artist_name", "thubnail", "1", "", "", "", 120));
-        exampleSongs.add(new Song("song_id", "song_name", "artist_name", "thubnail", "1", "", "", "", 120));
-        playlists.add(new Playlist("Example Playlist", "", exampleSongs));
+        // Obtain the DAO instance
+        playlistDAO = MusicApp.getDatabase().playlistDAO();
+
+        // Fetch all playlists from the database
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                playlists.addAll(playlistDAO.getAllPlaylists());
+                // Update the UI on the main thread
+                requireActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        playlistAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
     }
+
 
     public interface OnPlaylistAddedListener {
         void onPlaylistAdded(Playlist playlist);
@@ -67,6 +83,8 @@ public class PlaylistFragment extends Fragment {
             }
         });
 
+
+
         recyclerView.setAdapter(playlistAdapter);
 
         addPlaylistButton.setOnClickListener(new View.OnClickListener() {
@@ -87,10 +105,26 @@ public class PlaylistFragment extends Fragment {
     }
 
     public void addPlaylist(Playlist playlist) {
-        playlists.add(playlist);
-        int position = playlists.size() - 1;
-        playlistAdapter.notifyItemInserted(position);
-        Log.d("Playlist", " " + playlists.size());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Insert the playlist into the database
+                playlistDAO.insert(playlist);
+                // Update the UI on the main thread
+                // Retrieve the updated list of playlists from the database
+                List<Playlist> updatedPlaylists = playlistDAO.getAllPlaylists();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Update the list of playlists in the adapter
+                        playlists.clear();
+                        playlists.addAll(updatedPlaylists);
+                        // Notify the adapter of the data change
+                        playlistAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
     }
 }
 
