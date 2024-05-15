@@ -13,4 +13,6 @@
     <string name="playlist_name">Playlist Name</string>
     <string name="playlist_description">Playlist Description</string>
     <string name="add_playlist">Add Playlist</string>
+    <string name="edit_playlist">Edit Playlist</string>
+    <string name="delete_playlist">Delete Playlist</string>
 </resources>

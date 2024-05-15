@@ -1,39 +1,47 @@
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/playlist_activity"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-        android:padding="16dp" >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/playlist_activity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
 
-        <!-- AppBar / CollapsingToolbarLayout -->
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
 
-            <!-- Toolbar -->
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                app:title=""
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipChildren="true"
-                app:layout_collapseMode="pin">
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipChildren="true"
+                    app:layout_collapseMode="pin"
+                    app:title="">
 
-                    <!-- Back Button -->
-                    <ImageButton
-                        android:id="@+id/back_btn"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="top"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:contentDescription="back_button"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:src="@drawable/ic_left" />
+                        <ImageButton
+                            android:id="@+id/back_btn"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="start"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:contentDescription="back_button"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:src="@drawable/ic_left" />
 
-        </androidx.appcompat.widget.Toolbar>
+                        <ImageButton
+                            android:id="@+id/options_btn"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_gravity="end"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:contentDescription="options_button"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:src="@drawable/ic_dots" />
+
+                </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <ImageView
             android:layout_width="200dp"
@@ -44,7 +52,6 @@
             android:src="@drawable/default_playlist_avatar">
         </ImageView>
 
-        <!-- Playlist info TextViews -->
         <TextView
             android:id="@+id/playlist_name_title"
             android:layout_width="wrap_content"
@@ -67,9 +74,7 @@
             android:id="@+id/playlist_recycler_view"
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
-
+            android:layout_height="match_parent">
         </androidx.recyclerview.widget.RecyclerView>
 
-
-    </LinearLayout>
+</LinearLayout>
