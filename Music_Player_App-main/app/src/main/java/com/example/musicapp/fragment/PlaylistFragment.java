@@ -57,14 +57,52 @@ public class PlaylistFragment extends Fragment {
         playlists = new ArrayList<>();
 
         addPlaylistButton = view.findViewById(R.id.add_playlist_button);
-        addPlaylistButton.setOnClickListener(v -> {
-            // Handle adding a new playlist
+        addPlaylistButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AddPlaylistBottomSheetFragment bottomSheetFragment = new AddPlaylistBottomSheetFragment();
+                bottomSheetFragment.setAddPlaylistListener(new AddPlaylistBottomSheetFragment.AddPlaylistListener() {
+                    @Override
+                    public void onPlaylistAdded(Playlist playlist) {
+                        addPlaylist(playlist);
+                    }
+                });
+                bottomSheetFragment.show(getChildFragmentManager(), bottomSheetFragment.getTag());
+            }
         });
 
         loadPlaylists();
 
         return view;
     }
+
+    public void addPlaylist(Playlist playlist) {
+        playlists.add(playlist);
+        int position = playlists.size() - 1;
+        playlistAdapter.notifyItemInserted(position);
+        Log.d("Playlist", " " + playlists.size());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Insert the playlist into the database
+                playlistDAO.insert(playlist);
+                // Update the UI on the main thread
+                // Retrieve the updated list of playlists from the database
+                List<Playlist> updatedPlaylists = playlistDAO.getAllPlaylists();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Update the list of playlists in the adapter
+                        playlists.clear();
+                        playlists.addAll(updatedPlaylists);
+                        // Notify the adapter of the data change
+                        playlistAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }).start();
+    }
+
 
     private void loadPlaylists() {
         new Thread(() -> {

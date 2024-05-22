@@ -1,5 +1,6 @@
 package com.example.musicapp.fragment;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +20,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.musicapp.R;
+import com.example.musicapp.SearchActivity;
 import com.example.musicapp.adapter.TrendingSongAdapter;
 import com.example.musicapp.model.Song;
 import com.example.musicapp.service.MusicService;
@@ -52,6 +55,15 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_trending, container, false);
+
+        Button searchButton = view.findViewById(R.id.btn_search);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
+            }
+        });
 
         tv_dateAndTime = view.findViewById(R.id.tv_dateAndTime);
         tv_trending = view.findViewById(R.id.tv_trending);
@@ -99,6 +111,12 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
                 mListSong.clear();
                 mListSong.addAll(songs);
                 trendingSongAdapter.setData(getContext(), mListSong);
+                // Pass songIds to PlayerActivity
+                ArrayList<String> songIds = new ArrayList<>();
+                for (Song song : songs) {
+                    songIds.add(song.getId());
+                }
+                trendingSongAdapter.setSongIds(songIds);
             }
 
             @Override

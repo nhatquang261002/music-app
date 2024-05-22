@@ -61,9 +61,11 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")  // Vẽ biểu đồ
 
     implementation("me.relex:circleindicator:2.1.6") // Indicator
+    implementation("com.squareup.okhttp3:okhttp:4.9.1")
 
     implementation("androidx.room:room-runtime:2.6.1")
     annotationProcessor("androidx.room:room-compiler:2.6.1")
+
 
 
 

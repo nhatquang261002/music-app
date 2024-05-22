@@ -1,9 +1,11 @@
 package com.example.musicapp.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -11,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.musicapp.R;
+import com.example.musicapp.SearchActivity;
 import com.example.musicapp.adapter.LibraryPagerAdapter;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -26,6 +29,16 @@ public class LibraryFragment extends Fragment {
         viewPager2.setAdapter(new LibraryPagerAdapter(this));
 
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+
+        Button searchButton = view.findViewById(R.id.btn_search);
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to the search activity using Intent
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
+            }
+        });
 
         // Link the TabLayout and the ViewPager2 together
         new TabLayoutMediator(tabLayout, viewPager2,

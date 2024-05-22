@@ -113,7 +113,8 @@ public class PlaylistActivity extends AppCompatActivity implements PlaylistBotto
                 // Set up RecyclerView for songs in the playlist
                 RecyclerView songListRecyclerView = findViewById(R.id.playlist_recycler_view);
                 songListRecyclerView.setLayoutManager(new LinearLayoutManager(PlaylistActivity.this));
-                songListRecyclerView.setAdapter(new SongAdapter(playlistSongs));
+                songListRecyclerView.setAdapter(new SongAdapter(playlistSongs, PlaylistActivity.this));
+
             }
 
             @Override

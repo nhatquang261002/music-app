@@ -13,8 +13,9 @@
         android:id="@+id/cardView"
         android:src="@drawable/ic_launcher_background">
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
             android:src="@drawable/ic_launcher_background"
             android:id="@+id/thumbnail_img"/>
 

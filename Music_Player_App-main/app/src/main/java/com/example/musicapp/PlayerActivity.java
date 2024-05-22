@@ -43,7 +43,7 @@ public class PlayerActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Song song;
     int position = -1;
-    ArrayList<Song> listSongs = new ArrayList<>();
+    ArrayList<String> listSongIds = new ArrayList<>();
 
     private Thread playThread, prevThread, nextThread;
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapter.SongViewHolder> {
     Context mContext;
     public static ArrayList<Song> mList;    // Truyền đến PlayerActivity
+    private ArrayList<String> songIds;
 
 
     public void setData(Context mContext, ArrayList<Song> list){
@@ -72,13 +74,30 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
             }
         });
     }
+    // Modify TrendingSongAdapter to pass songIds
     private void onClickGoToPlayerActivity(int position) {
         Intent intent = new Intent(mContext, PlayerActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putInt("position", position);
+        bundle.putStringArrayList("songIds", extractSongIds());
         intent.putExtras(bundle);
+        intent.putExtra("position", position);
         mContext.startActivity(intent);
     }
+
+    private ArrayList<String> extractSongIds() {
+        ArrayList<String> songIds = new ArrayList<>();
+        for (Song song : mList) {
+            songIds.add(song.getId());
+        }
+        return songIds;
+    }
+
+    // Setter method for setting song IDs
+    public void setSongIds(ArrayList<String> ids) {
+        this.songIds = ids;
+    }
+
+
 
     @Override
     public int getItemCount() {

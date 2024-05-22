@@ -20,7 +20,8 @@ public class MainActivity extends AppCompatActivity {
     private AHBottomNavigation bottomNavigation;
     private ViewPager2 viewPager;
 
-    public static AppDatabase database;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,12 +32,15 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+
         });
+
+        // Call the method to create bottom navigation bar
+        createBottomNavigationBar();
 
 
         viewPager = findViewById(R.id.view_pager);
         setUpViewPager();
-        createBottomNavigationBar();
     }
 
 

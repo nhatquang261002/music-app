@@ -38,6 +38,8 @@ public class PlaylistBottomSheetFragment extends BottomSheetDialogFragment {
 
         TextView editPlaylist = view.findViewById(R.id.edit_playlist);
         TextView deletePlaylist = view.findViewById(R.id.delete_playlist);
+        editPlaylist.setText("Chỉnh sửa Playlist");
+        deletePlaylist.setText("Xoá Playlist");
 
         editPlaylist.setOnClickListener(v -> {
             if (listener != null) {

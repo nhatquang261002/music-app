@@ -33,6 +33,7 @@ public class EditPlaylistActivity extends AppCompatActivity {
 
         editTextName = findViewById(R.id.edit_text_name);
         editTextDescription = findViewById(R.id.edit_text_description);
+
         Button saveButton = findViewById(R.id.button_save);
 
         // Initialize playlistDAO

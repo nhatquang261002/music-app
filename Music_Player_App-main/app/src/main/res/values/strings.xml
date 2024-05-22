@@ -4,15 +4,15 @@
     <string name="tab_2">Khám phá</string>
     <string name="tab_3">Trending</string>
     <string name="tab_4">Cá nhân</string>
-    <string name="options">Options</string>
+    <string name="options">Tuỳ Chỉnh</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_playlist_button_name">Tạo Playlist</string>
-    <string name="add_new_playlist">Add New Playlist</string>
-    <string name="playlist_name">Playlist Name</string>
-    <string name="playlist_description">Playlist Description</string>
-    <string name="add_playlist">Add Playlist</string>
-    <string name="edit_playlist">Edit Playlist</string>
-    <string name="delete_playlist">Delete Playlist</string>
+    <string name="add_new_playlist">Tạo Playlist</string>
+    <string name="playlist_name">Tên Playlist</string>
+    <string name="playlist_description">Mô Tả</string>
+    <string name="add_playlist">Thêm Playlist</string>
+    <string name="edit_playlist">Chỉnh sửa Playlist</string>
+    <string name="delete_playlist">Xoá Playlist</string>
 </resources>
