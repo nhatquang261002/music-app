@@ -15,9 +15,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.musicapp.adapter.SongAdapter;
+import com.example.musicapp.data.PlaylistDAO;
 import com.example.musicapp.model.Song;
 import com.example.musicapp.service.MusicService;
+
 import java.util.ArrayList;
 
 public class SearchActivity extends AppCompatActivity {
@@ -30,6 +33,7 @@ public class SearchActivity extends AppCompatActivity {
     private TextView emptyResultText;
     private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
+    private PlaylistDAO mPlaylistDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +54,9 @@ public class SearchActivity extends AppCompatActivity {
         });
 
         searchResultsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
+        mPlaylistDAO = MusicApp.getDatabase().playlistDAO();
         searchResultsList = new ArrayList<>();
-        songAdapter = new SongAdapter(searchResultsList, this);
+        songAdapter = new SongAdapter(searchResultsList, this, mPlaylistDAO);
         searchResultsRecyclerView.setAdapter(songAdapter);
 
         setupSearchListener();
@@ -84,11 +88,12 @@ public class SearchActivity extends AppCompatActivity {
         if (query.isEmpty()) {
             searchResultsList.clear();
             songAdapter.notifyDataSetChanged();
+            emptyResultText.setVisibility(View.GONE); // Hide empty result text when query is empty
             return;
         }
 
         loadingIndicator.setVisibility(View.VISIBLE); // Show loading indicator
-        emptyResultText.setVisibility(View.GONE); // Hide empty result text
+        emptyResultText.setVisibility(View.GONE); // Hide empty result text initially
 
         MusicService.searchSongs(this, query, new MusicService.SongCallback() {
             @Override
@@ -97,11 +102,9 @@ public class SearchActivity extends AppCompatActivity {
                 searchResultsList.clear();
                 searchResultsList.addAll(songs);
                 songAdapter.notifyDataSetChanged();
-                // Extract song IDs and pass them to the adapter
-                ArrayList<String> songIds = extractSongIds();
-                songAdapter.setSongIds(songIds);
+
                 if (songs.isEmpty()) {
-                    emptyResultText.setVisibility(View.VISIBLE); // Show empty result text
+                    emptyResultText.setVisibility(View.VISIBLE); // Show empty result text when no results found
                 } else {
                     emptyResultText.setVisibility(View.GONE); // Hide empty result text if there are results
                 }
@@ -111,19 +114,12 @@ public class SearchActivity extends AppCompatActivity {
             public void onError(String message) {
                 loadingIndicator.setVisibility(View.GONE); // Hide loading indicator
                 Log.e("SearchActivity", "Search error: " + message);
-                emptyResultText.setVisibility(View.VISIBLE); // Show empty result text
+                emptyResultText.setVisibility(View.VISIBLE); // Show empty result text when error occurs
                 emptyResultText.setText(message); // Show the error message
             }
         });
     }
 
 
-    // Modify this method to extract song IDs
-    private ArrayList<String> extractSongIds() {
-        ArrayList<String> songIds = new ArrayList<>();
-        for (Song song : searchResultsList) {
-            songIds.add(song.getId());
-        }
-        return songIds;
-    }
+
 }

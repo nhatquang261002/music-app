@@ -33,7 +33,94 @@ public class MusicService {
         void onError(String message);
     }
 
+    public interface SongInfoCallback {
+        void onSuccess(Song song);
+        void onError(String message);
+    }
+
     private static final String BASE_URL = "https://mp3.zing.vn/xhr/";
+
+    // Method to get song info by ID
+    public static void getSongInfoById(Context context, String songId, final SongInfoCallback callback) {
+        // Create a request queue
+        RequestQueue requestQueue = Volley.newRequestQueue(context, new HurlStack(null, getSSLContext().getSocketFactory()));
+
+        // Construct the URL for getting song info by ID
+        String SONG_INFO_URL = BASE_URL + "media/get-info?type=audio&id=" + songId;
+
+        // Create a string request
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, SONG_INFO_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            // Parse the response and extract song info
+                            Song song = parseSongInfo(response);
+                            // Invoke the success callback with the song info
+                            callback.onSuccess(song);
+                        } catch (JSONException e) {
+                            // If there's an error parsing JSON, invoke the error callback
+                            callback.onError("Error parsing JSON: " + e.getMessage());
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                // If there's a network error, invoke the error callback
+                callback.onError("Error fetching data");
+            }
+        });
+
+        // Add the request to the queue
+        requestQueue.add(stringRequest);
+    }
+
+
+
+    // Method to parse the response and extract song info
+    private static Song parseSongInfo(String response) throws JSONException {
+        // Parse the JSON response
+        JSONObject jsonObject = new JSONObject(response);
+        JSONObject jsonData = jsonObject.getJSONObject("data");
+
+        // Extract song details from the JSON object
+        String id = jsonData.getJSONObject("info").getString("id");
+        String thumbnail = jsonData.getJSONObject("info").getString("thumbnail");
+
+        // Assuming you want to extract the first artist and composer
+        JSONObject artist = jsonData.getJSONArray("artists").getJSONObject(0);
+        String artistName = artist.getString("name");
+
+        JSONObject composer = jsonData.getJSONArray("composers").getJSONObject(0);
+        String composerName = composer.getString("name");
+
+
+
+        // Create a Song object with the extracted details
+        Song song = new Song(
+                id,
+                jsonData.getString("name"),
+                artistName,
+                thumbnail,
+                "position_placeholder",
+                jsonData.optString("lyric", ""), // Use optString to handle missing values
+                jsonData.getJSONObject("source").getString("128"),
+                jsonData.getString("code"),
+                jsonData.getInt("duration")
+        );
+
+        Log.d("song", song.getName_song());
+
+        // Adjust thumbnail URL
+        int index = song.getThumbnail().indexOf("w94_r1x1_jpeg/");
+        String thumbnailUrl = song.getThumbnail().substring(0, index) + song.getThumbnail().substring(index + "w94_r1x1_jpeg/".length());
+        song.setThumbnail(thumbnailUrl);
+
+        return song;
+    }
+
+
+
 
     public static void fetchSongs(Context context, final SongCallback callback) {
         RequestQueue requestQueue = Volley.newRequestQueue(context, new HurlStack(null, getSSLContext().getSocketFactory()));
@@ -113,7 +200,7 @@ public class MusicService {
                     "", // Assuming no position information in the response
                     "", // Assuming no lyric information in the response
                     "", // Assuming no source information in the response
-                    "", // Assuming no code information in the response
+                    "",// Assuming no code information in the response
                     jsonSong.getInt("duration")
             );
 

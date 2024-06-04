@@ -45,6 +45,7 @@ dependencies {
     implementation("androidx.activity:activity:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.core:core:1.12.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -57,6 +58,9 @@ dependencies {
     implementation("com.squareup.picasso:picasso:2.5.2")
 
     implementation("com.google.android.exoplayer:exoplayer:2.18.7")
+    implementation("com.google.android.exoplayer:exoplayer-core:2.17.0")
+    implementation("com.google.android.exoplayer:exoplayer-hls:2.17.0")
+
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")  // Vẽ biểu đồ
 

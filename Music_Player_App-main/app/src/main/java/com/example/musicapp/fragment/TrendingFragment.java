@@ -19,9 +19,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.musicapp.MusicApp;
 import com.example.musicapp.R;
 import com.example.musicapp.SearchActivity;
+
 import com.example.musicapp.adapter.TrendingSongAdapter;
+import com.example.musicapp.data.AppDatabase;
+import com.example.musicapp.data.PlaylistDAO;
 import com.example.musicapp.model.Song;
 import com.example.musicapp.service.MusicService;
 import com.github.mikephil.charting.charts.CombinedChart;
@@ -50,14 +54,20 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
     private TextView tv_dateAndTime;
     private TextView tv_trending;
     private CombinedChart mChart;
+    private PlaylistDAO mPlaylistDAO;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_trending, container, false);
+        // Initialize mPlaylistDAO here
+        mPlaylistDAO = MusicApp.getDatabase().playlistDAO();
+
 
         Button searchButton = view.findViewById(R.id.btn_search);
         searchButton.setOnClickListener(new View.OnClickListener() {
+
+
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), SearchActivity.class);
@@ -69,7 +79,8 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
         tv_trending = view.findViewById(R.id.tv_trending);
 
         recyclerView = view.findViewById(R.id.recyclerView);
-        trendingSongAdapter = new TrendingSongAdapter();
+        // Pass mPlaylistDAO to the TrendingSongAdapter constructor
+        trendingSongAdapter = new TrendingSongAdapter(getContext(), mListSong, mPlaylistDAO);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(trendingSongAdapter);
@@ -111,12 +122,6 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
                 mListSong.clear();
                 mListSong.addAll(songs);
                 trendingSongAdapter.setData(getContext(), mListSong);
-                // Pass songIds to PlayerActivity
-                ArrayList<String> songIds = new ArrayList<>();
-                for (Song song : songs) {
-                    songIds.add(song.getId());
-                }
-                trendingSongAdapter.setSongIds(songIds);
             }
 
             @Override
@@ -198,10 +203,9 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
 
                             CombinedData data = new CombinedData();
                             data.setData(lineData);
-                            mChart.setData(data);
-                            mChart.invalidate();
-
-                        } catch (JSONException e) {
+                            mChart.setData
+                                    (data);
+                            mChart.invalidate();                    } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
 
@@ -242,4 +246,4 @@ public class TrendingFragment extends Fragment implements OnChartValueSelectedLi
         //set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         dataSet1.setDrawValues(false);   // Tắt hiển thị giá trị trục ox
     }
-}
+    }

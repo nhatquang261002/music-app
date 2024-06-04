@@ -1,10 +1,14 @@
 package com.example.musicapp;
 
-import static com.example.musicapp.adapter.TrendingSongAdapter.mList;
-
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -12,40 +16,52 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.musicapp.model.Song;
+import com.example.musicapp.service.MyService;
+import com.example.musicapp.service.ZingMp3Api;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 
 public class PlayerActivity extends AppCompatActivity {
     private TextView tv_nameSong, tv_nameArtist, duration_played, duration_total;
-    private ImageView cover_art, next_btn, prev_btn, back_btn, shuffle_btn, repeat_btn;
+    private ImageView cover_art, next_btn, prev_btn, back_btn;
     private FloatingActionButton playPause_btn;
     private SeekBar seekBar;
 
     private ExoPlayer exoPlayer;
     private Handler handler = new Handler();
     private Song song;
-    int position = -1;
-    ArrayList<String> listSongIds = new ArrayList<>();
+    private int position;
+    private ArrayList<Song> songList = new ArrayList<>();
 
-    private Thread playThread, prevThread, nextThread;
+    private Thread prevThread, nextThread;
+
+    private MyService myService;
+    private boolean isServiceConnected;
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyService.MyBinder myBinder = (MyService.MyBinder) service;
+            isServiceConnected = true;
+            myService = myBinder.getMyService();
+
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            myService = null;
+            isServiceConnected = false;
+        }
+    };
+
 
 
     @Override
@@ -60,17 +76,14 @@ public class PlayerActivity extends AppCompatActivity {
         });
         initViews();
         GetIntentMethod();
-        PlayMusic();
-
-
 
 
         //___________________________________________
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (exoPlayer!=null && fromUser) {
-                    exoPlayer.seekTo(progress * 1000);
+                if (isServiceConnected && fromUser) {
+                    myService.seekTo(progress * 1000);
                 }
             }
             @Override
@@ -78,29 +91,35 @@ public class PlayerActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-        PlayerActivity.this.runOnUiThread(new Runnable() {  // Cập nhật thời lượng hiện tại
+
+        PlayerActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(exoPlayer!=null){
-                    int mCurrentPosition = (int) exoPlayer.getCurrentPosition()/1000;
+                if(isServiceConnected){
+                    int mCurrentPosition = myService.getCurrentPosition();
                     seekBar.setProgress(mCurrentPosition);
                     duration_played.setText(formattedTime(mCurrentPosition));
                 }
                 handler.postDelayed(this, 1000);
             }
         });
+
+
+
+
         playPause_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (exoPlayer.isPlaying()) {
-                    exoPlayer.pause();
+                if (myService.isPlaying()) {
+                    myService.pauseMusic();
                     playPause_btn.setImageResource(R.drawable.ic_play);
                 } else {
-                    exoPlayer.play();
+                    myService.resumeMusic();
                     playPause_btn.setImageResource(R.drawable.ic_pause);
                 }
             }
         });
+
         back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,20 +127,16 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        //playThread();
-        //prevThread();
-        //nextThread();
-
     }
+
     @Override
     protected void onResume() {
-
-        //playThread();
+        super.onResume();
         prevThread();
         nextThread();
-
-        super.onResume();
     }
+
+
 
     private void initViews() {
         tv_nameSong = findViewById(R.id.tv_nameSong);
@@ -132,86 +147,64 @@ public class PlayerActivity extends AppCompatActivity {
         next_btn = findViewById(R.id.next_btn);
         prev_btn = findViewById(R.id.prev_btn);
         back_btn = findViewById(R.id.back_btn);
-        shuffle_btn = findViewById(R.id.shuffle_btn);
-        repeat_btn = findViewById(R.id.repeat_btn);
         playPause_btn = findViewById(R.id.playPause_btn);
         seekBar = findViewById(R.id.seekBar);
     }
+
     private void GetIntentMethod() {
         Intent intent = getIntent();
-        position = intent.getIntExtra("position", -1);
+        position = intent.getIntExtra("position", 0);
+        Bundle bundle = intent.getExtras();
+        if (bundle != null) {
+            songList = (ArrayList<Song>) bundle.getSerializable("songsList");
+        }
 
-        if (position == -1) {
+
+        if (songList == null || songList.isEmpty()) {
             return;
         }
-        listSongs = mList;
-        song = mList.get(position);
-        if (song == null) {
-            return;
-        }
+
+        // Get the song at the specified position
+        song = songList.get(position);
+
+        // Update UI with the song details
         tv_nameSong.setText(song.getName_song());
         tv_nameArtist.setText(song.getName_artist());
-        Picasso.with(PlayerActivity.this).load(song.getThumbnail()).into(cover_art);// do data vao img_icon
-
+        Picasso.with(PlayerActivity.this).load(song.getThumbnail()).into(cover_art);
         duration_total.setText(formattedTime(song.getDuration()));
         seekBar.setMax(song.getDuration());
 
+
+        // To service
+        Intent intent_service = new Intent(this, MyService.class);
+        Bundle service_bundle = new Bundle();
+        service_bundle.putSerializable("object_song", song);
+        intent_service.putExtras(service_bundle);   // Nhận ở onStartCommand
+
+        startService(intent_service);
+        bindService(intent_service, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
-    private void PlayMusic() {
-        String url = "https://mp3.zing.vn/xhr/media/get-source?type=audio&key=" + song.getCode(); ;
-        RequestQueue requestQueue = Volley.newRequestQueue(PlayerActivity.this);
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String s) {
-                        try {
-                            JSONObject jsonObject =new JSONObject(s);
-                            JSONObject jsonObject_data = jsonObject.getJSONObject("data");
-                            JSONObject jsonObject_source = jsonObject_data.getJSONObject("source");
-                            String url = jsonObject_source.getString("128");
-                            exoPlayer = new ExoPlayer.Builder(PlayerActivity.this).build();
-                            MediaItem mediaItem = MediaItem.fromUri(url);
-                            //MediaItem mediaItem = MediaItem.fromUri(song.getSource());
 
-                            exoPlayer.setMediaItem(mediaItem);
-                            exoPlayer.prepare();
-                            exoPlayer.setPlayWhenReady(true);// lấy source nhạc
 
-                        } catch (JSONException e) {
-                            throw new RuntimeException(e);
-                        }
 
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
 
-                    }
-                });
-        requestQueue.add(stringRequest);
-    }
-    private String formattedTime(int mCurrentPosition) {
+    // Inside your PlayerActivity class
+    private String formattedTime(int currentPosition) {
         String totalout = "";
         String totalNew = "";
-        String seconds = String.valueOf(mCurrentPosition%60);
-        String minutes = String.valueOf(mCurrentPosition/60);
+        String seconds = String.valueOf(currentPosition % 60);
+        String minutes = String.valueOf(currentPosition / 60);
         totalout = minutes + ":" + seconds;
-        totalNew = minutes + ":0" + seconds;
-        if(seconds.length()==1){
-            return  totalNew;
-        }else {
-            return  totalout;
+        totalNew = minutes + ":" + "0" + seconds;
+        if (seconds.length() == 1) {
+            return totalNew;
+        } else {
+            return totalout;
         }
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        exoPlayer.release();
     }
 
     private void prevThread() {
-        prevThread = new Thread(){
+        prevThread = new Thread() {
             @Override
             public void run() {
                 super.run();
@@ -225,13 +218,29 @@ public class PlayerActivity extends AppCompatActivity {
         };
         prevThread.start();
     }
-    public void prevBtnClicked() {
-        exoPlayer.stop();
-        exoPlayer.release();
-        position = ((position - 1) < 0 ? (listSongs.size() - 1) : (position - 1)); // Âm thì trả về cuối danh sách, còn lại = pos -1
-        song = listSongs.get(position);
 
-        PlayMusic();
+    public void prevBtnClicked() {
+        Intent intent = new Intent(this, MyService.class);
+        stopService(intent);
+
+        // Bound Service
+        if (isServiceConnected){
+            unbindService(mServiceConnection);
+            isServiceConnected = false;
+        }
+
+        position = ((position - 1) < 0 ? (songList.size() - 1) : (position - 1)); // Âm thì trả về cuối danh sách, còn lại = pos -1
+        song = songList.get(position);
+
+
+        //_________________
+        Intent intent_service = new Intent(this, MyService.class);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("object_song", song);
+        intent_service.putExtras(bundle);   // Nhận
+        startService(intent_service);
+        bindService(intent_service, mServiceConnection, Context.BIND_AUTO_CREATE);
+
 
         tv_nameSong.setText(song.getName_song());
         tv_nameArtist.setText(song.getName_artist());
@@ -241,6 +250,38 @@ public class PlayerActivity extends AppCompatActivity {
         duration_total.setText(formattedTime(song.getDuration()));
         seekBar.setMax(song.getDuration());
 
+        playPause_btn.setImageResource(R.drawable.ic_pause);
+    }
+
+    public void nextBtnClicked() {
+        Intent intent = new Intent(this, MyService.class);
+        stopService(intent);
+
+        // Bound Service
+        if (isServiceConnected){
+            unbindService(mServiceConnection);
+            isServiceConnected = false;
+        }
+
+
+        position = ((position + 1) % songList.size()); // không bị ra khỏi mảng
+        song = songList.get(position);
+
+        //_________________
+        Intent intent_service = new Intent(this, MyService.class);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("object_song", song);
+        intent_service.putExtras(bundle);   // Nhận
+        startService(intent_service);
+        bindService(intent_service, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+        tv_nameSong.setText(song.getName_song());
+        tv_nameArtist.setText(song.getName_artist());
+
+        Picasso.with(PlayerActivity.this).load(song.getThumbnail()).into(cover_art);
+
+        duration_total.setText(formattedTime(song.getDuration()));
+        seekBar.setMax(song.getDuration());
         playPause_btn.setImageResource(R.drawable.ic_pause);
     }
 
@@ -259,24 +300,4 @@ public class PlayerActivity extends AppCompatActivity {
         };
         nextThread.start();
     }
-    public void nextBtnClicked() {
-        exoPlayer.stop();
-        exoPlayer.release();
-        position = ((position + 1) % listSongs.size()); // không bị ra khỏi mảng
-        song = listSongs.get(position);
-
-        PlayMusic();
-
-        tv_nameSong.setText(song.getName_song());
-        tv_nameArtist.setText(song.getName_artist());
-
-        Picasso.with(PlayerActivity.this).load(song.getThumbnail()).into(cover_art);
-
-        duration_total.setText(formattedTime(song.getDuration()));
-        seekBar.setMax(song.getDuration());
-        playPause_btn.setImageResource(R.drawable.ic_pause);
-    }
-
-
-
 }

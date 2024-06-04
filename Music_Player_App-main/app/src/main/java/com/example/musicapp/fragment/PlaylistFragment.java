@@ -107,12 +107,15 @@ public class PlaylistFragment extends Fragment {
     private void loadPlaylists() {
         new Thread(() -> {
             playlists = playlistDAO.getAllPlaylists();
-            getActivity().runOnUiThread(() -> {
-                playlistAdapter = new PlaylistAdapter(playlists, PlaylistFragment.this::onPlaylistClicked);
-                recyclerView.setAdapter(playlistAdapter);
-            });
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    playlistAdapter = new PlaylistAdapter(playlists, this::onPlaylistClicked);
+                    recyclerView.setAdapter(playlistAdapter);
+                });
+            }
         }).start();
     }
+
 
     private void onPlaylistClicked(Playlist playlist) {
         Intent intent = new Intent(getContext(), PlaylistActivity.class);
