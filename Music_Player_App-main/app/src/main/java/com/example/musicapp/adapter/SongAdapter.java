@@ -1,5 +1,6 @@
 package com.example.musicapp.adapter;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -89,7 +90,7 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         holder.songOptionsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isInPlaylist) {
+                if (isInPlaylist) {
                     showPopupMenu(holder.songOptionsButton, song);
                 } else {
                     holder.songOptionsButton.setOnClickListener(new View.OnClickListener() {
@@ -121,8 +122,6 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
             songAvatar = itemView.findViewById(R.id.thumbnail_img);
             songOptionsButton = itemView.findViewById(R.id.option_btn);
         }
-
-
     }
 
     private void onClickGoToPlayerActivity(int position) {
@@ -136,12 +135,26 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
 
     private void showPopupMenu(View view, Song song) {
         PopupMenu popupMenu = new PopupMenu(context, view);
-        popupMenu.getMenuInflater().inflate(R.menu.menu_add_to_playlist, popupMenu.getMenu());
+        popupMenu.getMenuInflater().inflate(R.menu.menu_remove_from_playlist, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                int itemId = item.getItemId();
-               return false;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        playlistDAO.removeSongIdFromPlaylist(currentPlaylist.getId(), song.getId());
+                        songs.remove(song); // Remove song from the adapter list
+                        // Update the UI on the main thread after the operation
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                notifyDataSetChanged();
+                                Toast.makeText(context, "Song removed from playlist", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }).start();
+                return true;
             }
         });
         popupMenu.show();
@@ -229,6 +242,8 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
                         if (playlist != null) {
                             // Add the song to the playlist
                             playlistDAO.addSongIdToPlaylist(playlist.getId(), song.getId());
+                            songs.add(song); // Add song to the adapter list if necessary
+                            notifyDataSetChanged(); // Notify adapter to update the UI
                             String message = "Song '" + song.getName_song() + "' saved to playlist '" + playlistName + "'";
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                         } else {
@@ -254,5 +269,4 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.ViewHolder> {
         }
         return null;
     }
-
 }

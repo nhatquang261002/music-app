@@ -31,14 +31,13 @@ import java.util.List;
 
 public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapter.SongViewHolder> {
     private Context mContext;
-    private ArrayList<Song> mList;    // Truyền đến PlayerActivity
-
+    private ArrayList<Song> mList;
     private PlaylistDAO mPlaylistDAO;
 
     public TrendingSongAdapter(Context context, ArrayList<Song> list, PlaylistDAO playlistDAO) {
         this.mContext = context;
         this.mList = list;
-        this.mPlaylistDAO = playlistDAO; // Initialize PlaylistDAO
+        this.mPlaylistDAO = playlistDAO;
     }
 
     public void setData(Context mContext, ArrayList<Song> list){
@@ -58,29 +57,30 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
     }
 
     private void saveToPlaylist(final Song song, final String playlistName) {
-        // Create a new thread to perform database operations
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                // Get the playlist from the database
                 final Playlist playlist = getPlaylistByName(playlistName);
 
-                // Use the main thread to update the UI
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         if (playlist != null) {
-                            // Add the song to the playlist
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
                                     mPlaylistDAO.addSongIdToPlaylist(playlist.getId(), song.getId());
+                                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            notifyDataSetChanged();
+                                            String message = "Song '" + song.getName_song() + "' saved to playlist '" + playlistName + "'";
+                                            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
                                 }
                             }).start();
-                            String message = "Song '" + song.getName_song() + "' saved to playlist '" + playlistName + "'";
-                            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
                         } else {
-                            // Playlist doesn't exist, handle accordingly
                             Toast.makeText(mContext, "Playlist not found", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -88,16 +88,13 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
             }
         });
 
-        // Start the thread
         thread.start();
     }
-
 
     @NonNull
     @Override
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_trending_song,
-                parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_trending_song, parent, false);
         return new SongViewHolder(view);
     }
 
@@ -109,7 +106,7 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
         }
 
         holder.tv_index.setText(song.getPosition());
-        if (position == 0){
+        if (position == 0) {
             holder.tv_index.setTextColor(Color.parseColor("#3468f0"));
         } else if (position == 1) {
             holder.tv_index.setTextColor(Color.parseColor("#15c5a1"));
@@ -136,47 +133,38 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
     }
 
     private void showPlaylistDialog(final Song song) {
-        // Create a new thread to perform database operations
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                // Retrieve all playlists from the database
                 final List<Playlist> playlists = mPlaylistDAO.getAllPlaylists();
 
-                // Use the main thread to update the UI
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        // Extract playlist names from the list
                         final List<String> playlistNames = new ArrayList<>();
                         final boolean[] checkedPlaylists = new boolean[playlists.size()];
 
                         for (int i = 0; i < playlists.size(); i++) {
                             Playlist playlist = playlists.get(i);
-                            // Check if the playlist contains the song
                             if (!playlist.getSongIds().contains(song.getId())) {
                                 playlistNames.add(playlist.getName());
-                                checkedPlaylists[playlistNames.size() - 1] = false; // Initialize all playlists as unchecked
+                                checkedPlaylists[playlistNames.size() - 1] = false;
                             }
                         }
 
-                        // Create a dialog with a scrollable list of playlists and checkboxes
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle("Save To Playlist");
 
                         builder.setMultiChoiceItems(playlistNames.toArray(new String[0]), checkedPlaylists, new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int position, boolean isChecked) {
-                                // Update the checked state of the playlist
                                 checkedPlaylists[position] = isChecked;
                             }
                         });
 
-                        // Add a submit button
                         builder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-                                // Add the song to all the checked playlists
                                 for (int i = 0; i < checkedPlaylists.length; i++) {
                                     if (checkedPlaylists[i]) {
                                         saveToPlaylist(song, playlistNames.get(i));
@@ -185,11 +173,9 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
                             }
                         });
 
-                        // Add a cancel button
                         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int which) {
-                                // Cancel button clicked, do nothing
                             }
                         });
 
@@ -199,13 +185,8 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
             }
         });
 
-        // Start the thread
         thread.start();
     }
-
-
-
-
 
     private void onClickGoToPlayerActivity(int position) {
         Intent intent = new Intent(mContext, PlayerActivity.class);
@@ -224,7 +205,7 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
         return 0;
     }
 
-    public class SongViewHolder extends RecyclerView.ViewHolder{
+    public class SongViewHolder extends RecyclerView.ViewHolder {
         ImageView thumbnail_img;
         TextView tv_index, tv_nameSong, tv_nameArtist;
         ImageView option_btn;
@@ -232,7 +213,7 @@ public class TrendingSongAdapter extends RecyclerView.Adapter<TrendingSongAdapte
 
         public SongViewHolder(@NonNull View itemView) {
             super(itemView);
-            thumbnail_img =itemView.findViewById(R.id.thumbnail_img);
+            thumbnail_img = itemView.findViewById(R.id.thumbnail_img);
             tv_index = itemView.findViewById(R.id.tv_index);
             tv_nameSong = itemView.findViewById(R.id.tv_nameSong);
             tv_nameArtist = itemView.findViewById(R.id.tv_nameArtist);

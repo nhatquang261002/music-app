@@ -40,7 +40,7 @@ public class PlaylistFragment extends Fragment {
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == AppCompatActivity.RESULT_OK) {
-                    loadPlaylists();
+                    loadPlaylists(null);
                 }
             }
     );
@@ -71,7 +71,7 @@ public class PlaylistFragment extends Fragment {
             }
         });
 
-        loadPlaylists();
+        loadPlaylists(null);
 
         return view;
     }
@@ -103,24 +103,44 @@ public class PlaylistFragment extends Fragment {
         }).start();
     }
 
-
-    private void loadPlaylists() {
+    private void loadPlaylists(@Nullable Runnable callback) {
         new Thread(() -> {
             playlists = playlistDAO.getAllPlaylists();
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     playlistAdapter = new PlaylistAdapter(playlists, this::onPlaylistClicked);
                     recyclerView.setAdapter(playlistAdapter);
+                    if (callback != null) {
+                        callback.run();
+                    }
                 });
             }
         }).start();
     }
 
-
     private void onPlaylistClicked(Playlist playlist) {
-        Intent intent = new Intent(getContext(), PlaylistActivity.class);
-        intent.putExtra("playlist", playlist);
-        editPlaylistLauncher.launch(intent);
+        loadPlaylists(() -> {
+            // Find the updated playlist in the list
+            Playlist updatedPlaylist = findUpdatedPlaylist(playlist.getId());
+            if (updatedPlaylist != null) {
+                // Launch PlaylistActivity with the updated playlist
+                Intent intent = new Intent(getContext(), PlaylistActivity.class);
+                intent.putExtra("playlist", updatedPlaylist);
+                editPlaylistLauncher.launch(intent);
+            } else {
+                // Handle the case where the playlist is not found
+                Log.e("PlaylistFragment", "Updated playlist not found");
+            }
+        });
+    }
+
+    private Playlist findUpdatedPlaylist(long playlistId) {
+        for (Playlist updatedPlaylist : playlists) {
+            if (updatedPlaylist.getId() == playlistId) {
+                return updatedPlaylist;
+            }
+        }
+        return null;
     }
 
     @Override
