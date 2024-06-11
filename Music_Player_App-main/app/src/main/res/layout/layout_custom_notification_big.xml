@@ -1,16 +1,27 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_custom_notification_big"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
-    android:id="@+id/layout_custom_notification"
+    android:layout_height="120dp"
     android:padding="10dp">
 
+    <!-- Thumbnail Image -->
+    <ImageView
+        android:id="@+id/img_thumbnail"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_alignParentEnd="true"
+        android:scaleType="centerCrop" />
+
+    <!-- Song Details -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/layout_song_details"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_toStartOf="@+id/layout_button"
-        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_toStartOf="@+id/img_thumbnail"
         android:orientation="vertical">
+
         <TextView
             android:id="@+id/tv_title_song"
             android:layout_width="match_parent"
@@ -29,12 +40,15 @@
             android:textSize="13sp" />
     </LinearLayout>
 
+    <!-- Control Buttons -->
     <LinearLayout
         android:id="@+id/layout_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="10dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
@@ -58,4 +72,5 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_skip_next" />
     </LinearLayout>
+
 </RelativeLayout>

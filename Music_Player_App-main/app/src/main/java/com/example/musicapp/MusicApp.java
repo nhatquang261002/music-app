@@ -29,12 +29,14 @@ public class MusicApp extends Application {
         return database;
     }
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "Channel 1", NotificationManager.IMPORTANCE_DEFAULT);
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    "music_channel",
+                    "Music Channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
             NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null){
+            if (manager != null) {
                 manager.createNotificationChannel(channel);
             }
         }
